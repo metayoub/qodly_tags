@@ -27,6 +27,33 @@ const dataAccessSettings: TSetting[] = [
   },
 ];
 
+const componentSettings: TSetting[] = [
+  {
+    key: 'width',
+    label: 'Component Width',
+    type: ESetting.DIMENSIONS,
+    defaultValue: '100%',
+  },
+  {
+    key: 'height',
+    label: 'Component Height',
+    type: ESetting.DIMENSIONS,
+    defaultValue: 'fit-content',
+  },
+  {
+    key: 'iconLoader',
+    label: 'Load More Icon',
+    type: ESetting.ICON_PICKER,
+    defaultValue: 'fa-solid fa-circle-chevron-down',
+  },
+  {
+    key: 'iconAction',
+    label: 'Action Icon',
+    type: ESetting.ICON_PICKER,
+    defaultValue: 'fa-solid fa-xmark',
+  },
+];
+
 const Settings: TSetting[] = [
   {
     key: 'dataAccess',
@@ -35,12 +62,19 @@ const Settings: TSetting[] = [
     components: dataAccessSettings,
     isStateless: true,
   },
-  ...load(DEFAULT_SETTINGS).filter('dataAccess'),
+  {
+    key: 'componentProperties',
+    label: 'Component Properties',
+    type: ESetting.GROUP,
+    components: componentSettings,
+    isStateless: true,
+  },
+  ...load(DEFAULT_SETTINGS).filter('dataAccess', 'display'),
 ];
 
 export const BasicSettings: TSetting[] = [
   ...dataAccessSettings,
-  ...load(BASIC_SETTINGS).filter('style.overflow', 'serverSideRef'),
+  ...load(BASIC_SETTINGS).filter('style.overflow', 'serverSideRef', 'display'),
 ];
 
 export default Settings;

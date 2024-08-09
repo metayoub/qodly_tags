@@ -4,8 +4,26 @@ import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ITagsProps } from './Tags.config';
 
-const Tags: FC<ITagsProps> = ({ attribut, style, className, classNames = [] }) => {
-  const { connect } = useRenderer();
+const Tags: FC<ITagsProps> = ({
+  iconLoader,
+  iconAction,
+  attribut,
+  style,
+  className,
+  classNames = [],
+}) => {
+  const { connect, emit } = useRenderer({
+    omittedEvents: [
+      'onclick',
+      'onclickaction',
+      'onblur',
+      'onfocus',
+      'onmouseenter',
+      'onmouseleave',
+      'onkeydown',
+      'onkeyup',
+    ],
+  });
   const [tags, setTags] = useState<datasources.IEntity[]>(() => []);
   const [fullLength, setFullLength] = useState<number>(0);
   const {
@@ -24,15 +42,15 @@ const Tags: FC<ITagsProps> = ({ attribut, style, className, classNames = [] }) =
     if (!loader) {
       return;
     }
-    setTags(loader.page);
+    setTags((prev) => [...prev, ...loader.page]);
     setFullLength(loader.length);
   }, [loader]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (!loader || !ds) return;
 
     loader.sourceHasChanged().then(updateFromLoader);
-  }, []);
+  }, []);*/
 
   useEffect(() => {
     if (!loader || !ds) {
@@ -48,21 +66,50 @@ const Tags: FC<ITagsProps> = ({ attribut, style, className, classNames = [] }) =
     };
   }, [ds, updateFromLoader]);
 
-  // TODO: show the tags
-  // TODO: show the pageSize result and add load more.
+  const loadMore = () => {
+    if (loader && fullLength > tags.length) {
+      const newStart = loader.end;
+      loader?.fetchPage(newStart).then(updateFromLoader);
+    }
+  };
+
+  const handleAction = () => {
+    emit('onclickaction');
+  };
+
+  const handleOnclick = () => {
+    emit('onclick');
+  };
+
   // TODO: Tag is related can be related to ES and i can select one.
   // TODO: height and width should be more dynamic.
-  // TODO: add ann icon and an action related to it.
+  // TODO: add component width and height.
+  // TODO: add an icon for loadmore.
+  // TODO: make sur height and width of tag is working.
+  // TODO: if the width is fix make sur that you display a part of text.
+  // TODO: add an icon and an action related to it.
 
   return (
-    <span ref={connect} className={cn(className, classNames)}>
+    <div ref={connect} className={cn(className, classNames)}>
       {tags.map((tag, index) => (
-        <div style={style} key={index}>
-          {tag[attribut as keyof typeof tag] as string}
+        <div
+          className="cursor-pointer flex items-center space-x-2"
+          style={style}
+          key={index}
+          onClick={handleOnclick}
+        >
+          <span>{tag[attribut as keyof typeof tag] as string}</span>
+          <div className={cn('action cursor-pointer fa', iconAction)} onClick={handleAction} />
         </div>
       ))}
-      {fullLength > tags.length && <div style={style}>...</div>}
-    </span>
+      {fullLength > tags.length && (
+        <div
+          style={style}
+          className={cn('load-more cursor-pointer fa', iconLoader)}
+          onClick={loadMore}
+        />
+      )}
+    </div>
   );
 };
 

@@ -33,6 +33,10 @@ export default {
         value: 'onclick',
       },
       {
+        label: 'On Click Action',
+        value: 'onclickaction',
+      },
+      {
         label: 'On Blur',
         value: 'onblur',
       },
@@ -93,6 +97,8 @@ export default {
   defaultProps: {
     iterableChild: true,
     attribut: '',
+    iconAction: 'fa-solid fa-xmark',
+    iconLoader: 'fa-solid fa-spinner',
     style: {
       display: 'inline-block',
       backgroundColor: 'rgb(218, 216, 216)',
@@ -113,4 +119,6 @@ export default {
 
 export interface ITagsProps extends webforms.ComponentProps {
   attribut?: string;
+  iconAction?: string;
+  iconLoader?: string;
 }
