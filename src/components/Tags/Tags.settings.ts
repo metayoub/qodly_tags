@@ -8,8 +8,8 @@ const dataAccessSettings: TSetting[] = [
     type: ESetting.DS_AUTO_SUGGEST,
   },
   {
-    key: 'field',
-    label: 'field',
+    key: 'attribut',
+    label: 'Attribut',
     type: ESetting.TEXT_FIELD,
     defaultValue: 'Qodly',
   },
