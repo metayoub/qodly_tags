@@ -29,10 +29,16 @@ const dataAccessSettings: TSetting[] = [
 
 const componentSettings: TSetting[] = [
   {
-    key: 'componentDimensions',
-    label: 'Component Dimensions',
-    type: ESetting.DIMENSIONS,
-    defaultValue: '100%',
+    key: 'componentWidth',
+    label: 'Component Width',
+    placeholder: 'Component Width',
+    type: ESetting.UNITFIELD,
+  },
+  {
+    key: 'componentHeight',
+    label: 'Component Height',
+    placeholder: 'Component Height',
+    type: ESetting.UNITFIELD,
   },
   {
     key: 'iconLoader',

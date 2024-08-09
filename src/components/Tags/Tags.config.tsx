@@ -37,28 +37,12 @@ export default {
         value: 'onclickaction',
       },
       {
-        label: 'On Blur',
-        value: 'onblur',
-      },
-      {
-        label: 'On Focus',
-        value: 'onfocus',
-      },
-      {
         label: 'On MouseEnter',
         value: 'onmouseenter',
       },
       {
         label: 'On MouseLeave',
         value: 'onmouseleave',
-      },
-      {
-        label: 'On KeyDown',
-        value: 'onkeydown',
-      },
-      {
-        label: 'On KeyUp',
-        value: 'onkeyup',
       },
     ],
     datasources: {
@@ -123,4 +107,6 @@ export interface ITagsProps extends webforms.ComponentProps {
   attribut?: string;
   iconAction?: string;
   iconLoader?: string;
+  componentWidth?: any;
+  componentHeight?: any;
 }

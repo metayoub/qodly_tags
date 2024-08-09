@@ -10,20 +10,13 @@ const Tags: FC<ITagsProps> = ({
   iconAction,
   attribut,
   style,
+  componentWidth,
+  componentHeight,
   className,
   classNames = [],
 }) => {
   const { connect, emit } = useRenderer({
-    omittedEvents: [
-      'onclick',
-      'onclickaction',
-      'onblur',
-      'onfocus',
-      'onmouseenter',
-      'onmouseleave',
-      'onkeydown',
-      'onkeyup',
-    ],
+    omittedEvents: ['onclick', 'onclickaction'],
   });
   const [tags, setTags] = useState<datasources.IEntity[]>(() => []);
   const [fullLength, setFullLength] = useState<number>(0);
@@ -93,35 +86,48 @@ const Tags: FC<ITagsProps> = ({
     emit('onclick');
   };
 
-  // TODO: handle if ds is not defined
+  // TODO: can we do it like a Matrix
+  // TODO: handle if attribute is not defined
   // TODO: to see if we need to change the css of the selected element or not.
-  // TODO: height and width should be more dynamic.
-  // TODO: add component width and height.
-  // TODO: make sur height and width of tag is working.
-  // TODO: if the width is fix make sur that you display a part of text.
+  // TODO: if the width is fix make sur that you display a part of text. (maybe a css example can do it)
 
   return (
-    <div ref={connect} className={cn(className, classNames)}>
-      {tags.map((tag, index) => (
-        <div
-          className="cursor-pointer flex items-center space-x-2"
-          style={style}
-          key={index}
-          onClick={() => handleClick(index)}
-        >
-          <span>{tag[attribut as keyof typeof tag] as string}</span>
-          {enableAction && (
-            <div className={cn('action cursor-pointer fa', iconAction)} onClick={handleAction} />
+    <div
+      ref={connect}
+      className={cn(className, classNames, 'overflow-auto')}
+      style={{ width: componentWidth, height: componentHeight }}
+    >
+      {loader ? (
+        <>
+          {tags.map((tag, index) => (
+            <div
+              className="cursor-pointer flex items-center space-x-2"
+              style={style}
+              key={index}
+              onClick={() => handleClick(index)}
+            >
+              <span>{tag[attribut as keyof typeof tag] as string}</span>
+              {enableAction && (
+                <div
+                  className={cn('action cursor-pointer fa', iconAction)}
+                  onClick={handleAction}
+                />
+              )}
+            </div>
+          ))}
+          {fullLength > tags.length && (
+            <div
+              style={{ ...style, width: '' }}
+              className={cn('load-more cursor-pointer fa leading-normal', iconLoader)}
+              onClick={loadMore}
+            >
+              &#8203;
+            </div>
           )}
-        </div>
-      ))}
-      {fullLength > tags.length && (
-        <div
-          style={{ ...style, width: '' }}
-          className={cn('load-more cursor-pointer fa leading-normal', iconLoader)}
-          onClick={loadMore}
-        >
-          &#8203;
+        </>
+      ) : (
+        <div className="flex h-full flex-col items-center justify-center rounded-lg border bg-purple-400 py-4 text-white">
+          <p>Error</p>
         </div>
       )}
     </div>
