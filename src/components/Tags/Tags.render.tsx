@@ -1,10 +1,11 @@
-import { DataLoader, useRenderer, useSources } from '@ws-ui/webform-editor';
+import { DataLoader, updateEntity, useRenderer, useSources } from '@ws-ui/webform-editor';
 import cn from 'classnames';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ITagsProps } from './Tags.config';
 
 const Tags: FC<ITagsProps> = ({
+  enableAction = true,
   iconLoader,
   iconAction,
   attribut,
@@ -27,7 +28,7 @@ const Tags: FC<ITagsProps> = ({
   const [tags, setTags] = useState<datasources.IEntity[]>(() => []);
   const [fullLength, setFullLength] = useState<number>(0);
   const {
-    sources: { datasource: ds },
+    sources: { datasource: ds, currentElement },
   } = useSources();
 
   const loader = useMemo<DataLoader | null>(() => {
@@ -46,12 +47,6 @@ const Tags: FC<ITagsProps> = ({
     setFullLength(loader.length);
   }, [loader]);
 
-  /*useEffect(() => {
-    if (!loader || !ds) return;
-
-    loader.sourceHasChanged().then(updateFromLoader);
-  }, []);*/
-
   useEffect(() => {
     if (!loader || !ds) {
       return;
@@ -66,6 +61,21 @@ const Tags: FC<ITagsProps> = ({
     };
   }, [ds, updateFromLoader]);
 
+  const updateCurrentDsValue = async ({
+    index,
+    forceUpdate = false,
+    fireEvent = true,
+  }: {
+    index: number;
+    forceUpdate?: boolean;
+    fireEvent?: boolean;
+  }) => {
+    if (!ds || !currentElement || !forceUpdate) {
+      return;
+    }
+    await updateEntity({ index, datasource: ds, currentElement, fireEvent });
+  };
+
   const loadMore = () => {
     if (loader && fullLength > tags.length) {
       const newStart = loader.end;
@@ -73,21 +83,22 @@ const Tags: FC<ITagsProps> = ({
     }
   };
 
-  const handleAction = () => {
+  const handleAction = (e: any) => {
+    e.stopPropagation();
     emit('onclickaction');
   };
 
-  const handleOnclick = () => {
+  const handleClick = (index: number) => {
+    updateCurrentDsValue({ index, forceUpdate: true });
     emit('onclick');
   };
 
-  // TODO: Tag is related can be related to ES and i can select one.
+  // TODO: handle if ds is not defined
+  // TODO: to see if we need to change the css of the selected element or not.
   // TODO: height and width should be more dynamic.
   // TODO: add component width and height.
-  // TODO: add an icon for loadmore.
   // TODO: make sur height and width of tag is working.
   // TODO: if the width is fix make sur that you display a part of text.
-  // TODO: add an icon and an action related to it.
 
   return (
     <div ref={connect} className={cn(className, classNames)}>
@@ -96,18 +107,22 @@ const Tags: FC<ITagsProps> = ({
           className="cursor-pointer flex items-center space-x-2"
           style={style}
           key={index}
-          onClick={handleOnclick}
+          onClick={() => handleClick(index)}
         >
           <span>{tag[attribut as keyof typeof tag] as string}</span>
-          <div className={cn('action cursor-pointer fa', iconAction)} onClick={handleAction} />
+          {enableAction && (
+            <div className={cn('action cursor-pointer fa', iconAction)} onClick={handleAction} />
+          )}
         </div>
       ))}
       {fullLength > tags.length && (
         <div
-          style={style}
-          className={cn('load-more cursor-pointer fa', iconLoader)}
+          style={{ ...style, width: '' }}
+          className={cn('load-more cursor-pointer fa leading-normal', iconLoader)}
           onClick={loadMore}
-        />
+        >
+          &#8203;
+        </div>
       )}
     </div>
   );

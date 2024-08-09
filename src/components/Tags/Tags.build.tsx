@@ -4,7 +4,14 @@ import { FC } from 'react';
 
 import { ITagsProps } from './Tags.config';
 
-const Tags: FC<ITagsProps> = ({ iconAction, iconLoader, style, className, classNames = [] }) => {
+const Tags: FC<ITagsProps> = ({
+  enableAction = true,
+  iconAction,
+  iconLoader,
+  style,
+  className,
+  classNames = [],
+}) => {
   const {
     connectors: { connect },
   } = useEnhancedNode();
@@ -26,11 +33,16 @@ const Tags: FC<ITagsProps> = ({ iconAction, iconLoader, style, className, classN
       {Tags.map((tag, index) => (
         <div className="cursor-pointer flex items-center space-x-2" style={style} key={index}>
           <span>{tag.name}</span>
-          <div className={cn('action cursor-pointer fa', iconAction)} />
+          {enableAction && <div className={cn('action cursor-pointer fa', iconAction)} />}
         </div>
       ))}
 
-      <div style={style} className={cn('load-more cursor-pointer fa', iconLoader)} />
+      <div
+        style={{ ...style, width: '' }}
+        className={cn('load-more cursor-pointer fa leading-normal', iconLoader)}
+      >
+        &#8203;
+      </div>
     </div>
   );
 };

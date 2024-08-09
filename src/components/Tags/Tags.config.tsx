@@ -97,6 +97,7 @@ export default {
   defaultProps: {
     iterableChild: true,
     attribut: '',
+    enableAction: true,
     iconAction: 'fa-solid fa-xmark',
     iconLoader: 'fa-solid fa-spinner',
     style: {
@@ -118,6 +119,7 @@ export default {
 } as T4DComponentConfig<ITagsProps>;
 
 export interface ITagsProps extends webforms.ComponentProps {
+  enableAction?: boolean;
   attribut?: string;
   iconAction?: string;
   iconLoader?: string;

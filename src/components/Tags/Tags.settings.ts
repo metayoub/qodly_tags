@@ -29,22 +29,22 @@ const dataAccessSettings: TSetting[] = [
 
 const componentSettings: TSetting[] = [
   {
-    key: 'width',
-    label: 'Component Width',
+    key: 'componentDimensions',
+    label: 'Component Dimensions',
     type: ESetting.DIMENSIONS,
     defaultValue: '100%',
-  },
-  {
-    key: 'height',
-    label: 'Component Height',
-    type: ESetting.DIMENSIONS,
-    defaultValue: 'fit-content',
   },
   {
     key: 'iconLoader',
     label: 'Load More Icon',
     type: ESetting.ICON_PICKER,
     defaultValue: 'fa-solid fa-circle-chevron-down',
+  },
+  {
+    key: 'enableAction',
+    label: 'Enable Action',
+    type: ESetting.CHECKBOX,
+    defaultValue: true,
   },
   {
     key: 'iconAction',
@@ -74,6 +74,7 @@ const Settings: TSetting[] = [
 
 export const BasicSettings: TSetting[] = [
   ...dataAccessSettings,
+  ...componentSettings,
   ...load(BASIC_SETTINGS).filter('style.overflow', 'serverSideRef', 'display'),
 ];
 
