@@ -54,6 +54,7 @@ const Tags: FC<ITagsProps> = ({
     }
 
     const dsListener = () => {
+      setTags([]);
       loader.sourceHasChanged().then(updateFromLoader);
     };
     ds.addListener('changed', dsListener);
