@@ -20,9 +20,10 @@ const Tags: FC<ITagsProps> = ({
   });
   const [tags, setTags] = useState<datasources.IEntity[]>(() => []);
   const [fullLength, setFullLength] = useState<number>(0);
+  const [selected, setSelected] = useState<number>(-1);
   const {
     sources: { datasource: ds, currentElement },
-  } = useSources();
+  } = useSources({ acceptIteratorSel: true });
 
   const loader = useMemo<DataLoader | null>(() => {
     if (!ds) {
@@ -39,6 +40,13 @@ const Tags: FC<ITagsProps> = ({
     setTags((prev) => [...prev, ...loader.page]);
     setFullLength(loader.length);
   }, [loader]);
+
+  // need this to work in rederer
+  useEffect(() => {
+    if (!loader || !ds) return;
+
+    loader.sourceHasChanged().then(updateFromLoader);
+  }, []);
 
   useEffect(() => {
     if (!loader || !ds) {
@@ -81,14 +89,66 @@ const Tags: FC<ITagsProps> = ({
     emit('onclickaction');
   };
 
-  const handleClick = (index: number) => {
-    updateCurrentDsValue({ index, forceUpdate: true });
+  const handleClick = async (index: number) => {
+    await updateCurrentDsValue({ index, forceUpdate: true });
     emit('onclick');
   };
 
+  const getParentEntitySel = (
+    source: datasources.DataSource,
+    dataclassID: string,
+  ): datasources.DataSource | null => {
+    const parent = source.getParentSource();
+    if (!parent) {
+      return null;
+    } else if (parent.type === 'entitysel' && parent.dataclassID === dataclassID) {
+      return parent;
+    }
+
+    return getParentEntitySel(parent, dataclassID);
+  };
+  // handle selelctElement
+  const currentDsChangeHandler = useCallback(async () => {
+    if (!currentElement) {
+      return;
+    }
+
+    const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || ds;
+    const entity = (currentElement as any).getEntity();
+    if (entity) {
+      let currentIndex = entity.getPos();
+      if (currentIndex == null && parent) {
+        // used "==" to handle both null & undefined values
+        currentIndex = await parent.findElementPosition(currentElement);
+      }
+      if (typeof currentIndex === 'number') {
+        setSelected(currentIndex);
+      }
+    } else {
+      setSelected(-1);
+    }
+  }, [currentElement]);
+
+  useEffect(() => {
+    if (!currentElement) {
+      return;
+    }
+    // Get The selected element position
+    currentDsChangeHandler();
+  }, []);
+
+  useEffect(() => {
+    if (!currentElement) {
+      return;
+    }
+    currentElement.addListener('changed', currentDsChangeHandler);
+    return () => {
+      currentElement.removeListener('changed', currentDsChangeHandler);
+    };
+  }, [currentDsChangeHandler]);
+
   // TODO: can we do it like a Matrix
   // TODO: handle if attribute is not defined
-  // TODO: to see if we need to change the css of the selected element or not.
   // TODO: if the width is fix make sur that you display a part of text. (maybe a css example can do it)
 
   return (
@@ -101,7 +161,7 @@ const Tags: FC<ITagsProps> = ({
         <>
           {tags.map((tag, index) => (
             <div
-              className="cursor-pointer flex items-center space-x-2"
+              className={`cursor-pointer flex items-center space-x-2 ${selected === index && 'selected'}`}
               style={style}
               key={index}
               onClick={() => handleClick(index)}

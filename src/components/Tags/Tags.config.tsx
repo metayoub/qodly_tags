@@ -25,6 +25,12 @@ export default {
   },
   info: {
     displayName: 'Tags',
+    sanityCheck: {
+      keys: [
+        { name: 'datasource', require: true, isDatasource: true },
+        { name: 'currentElement', require: false, isDatasource: true },
+      ],
+    },
     exposed: true,
     icon: MdCircle,
     events: [
@@ -55,18 +61,18 @@ export default {
         ];
         if (attribut) {
           const { id: ds, namespace } = splitDatasourceID(datasource?.trim()) || {};
-          const { id: currentDs, namespace: currentDsNamespace } =
-            splitDatasourceID(currentElement) || {};
+          // const { id: currentDs, namespace: currentDsNamespace } =
+          // splitDatasourceID(currentElement) || {};
 
-          if (!ds && !currentDs) {
+          if (!ds) {
             return;
           }
-          if (currentDs && currentDsNamespace === namespace) {
+          /*if (currentDs && currentDsNamespace === namespace) {
             const colSrcID = `${currentDs}.${attribut}`;
             declarations.push({
               path: namespace ? `${namespace}:${colSrcID}` : colSrcID,
             });
-          }
+          }*/
 
           const fieldSrc = `${ds}.[].${attribut}`;
           declarations.push({
