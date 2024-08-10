@@ -85,7 +85,8 @@ const Tags: FC<ITagsProps> = ({
     }
   };
 
-  const handleAction = (e: any) => {
+  const handleAction = async (e: any, index: number) => {
+    await updateCurrentDsValue({ index, fireEvent: true });
     e.stopPropagation();
     emit('onclickaction');
   };
@@ -155,14 +156,14 @@ const Tags: FC<ITagsProps> = ({
   return (
     <div
       ref={connect}
-      className={cn(className, classNames, 'overflow-auto')}
+      className={cn(className, classNames)}
       style={{ width: componentWidth, height: componentHeight }}
     >
       {loader ? (
         <>
           {tags.map((tag, index) => (
             <div
-              className={`cursor-pointer flex items-center space-x-2 ${selected === index && 'selected'}`}
+              className={`flex items-center space-x-2 ${selected === index && 'selected'}`}
               style={style}
               key={index}
               onClick={() => handleClick(index)}
@@ -171,7 +172,7 @@ const Tags: FC<ITagsProps> = ({
               {enableAction && (
                 <div
                   className={cn('action cursor-pointer fa', iconAction)}
-                  onClick={handleAction}
+                  onClick={(e) => handleAction(e, index)}
                 />
               )}
             </div>

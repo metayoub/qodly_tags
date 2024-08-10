@@ -30,4 +30,5 @@ qodly_*.zip
 
 # Env variables
 .env.*
+.env
 !.env.example

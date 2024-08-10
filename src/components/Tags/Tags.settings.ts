@@ -33,12 +33,16 @@ const componentSettings: TSetting[] = [
     label: 'Component Width',
     placeholder: 'Component Width',
     type: ESetting.UNITFIELD,
+    isSmallInput: true,
+    hasLabel: true,
   },
   {
     key: 'componentHeight',
     label: 'Component Height',
     placeholder: 'Component Height',
     type: ESetting.UNITFIELD,
+    isSmallInput: true,
+    hasLabel: true,
   },
   {
     key: 'iconLoader',
