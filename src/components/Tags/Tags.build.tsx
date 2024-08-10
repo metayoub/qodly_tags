@@ -40,7 +40,7 @@ const Tags: FC<ITagsProps> = ({
       {datasource ? (
         <>
           {Tags.map((tag, index) => (
-            <div className="cursor-pointer flex items-center space-x-2" style={style} key={index}>
+            <div className=" flex items-center space-x-2" style={style} key={index}>
               <span>{tag.name}</span>
               {enableAction && <div className={cn('action cursor-pointer fa', iconAction)} />}
             </div>
@@ -55,7 +55,7 @@ const Tags: FC<ITagsProps> = ({
         </>
       ) : (
         <div className="flex h-full flex-col items-center justify-center rounded-lg border bg-purple-400 py-4 text-white">
-          <MdWarning className="mb-1 h-8 w-8" />
+          <MdWarning className="mb-1 h-4 w-4" />
           <p>Please attach a datasource</p>
         </div>
       )}

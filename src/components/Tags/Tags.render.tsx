@@ -86,7 +86,7 @@ const Tags: FC<ITagsProps> = ({
   };
 
   const handleAction = async (e: any, index: number) => {
-    await updateCurrentDsValue({ index, fireEvent: true });
+    await updateCurrentDsValue({ index, forceUpdate: true });
     e.stopPropagation();
     emit('onclickaction');
   };
