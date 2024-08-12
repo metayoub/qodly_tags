@@ -1,9 +1,4 @@
-import {
-  EComponentKind,
-  splitDatasourceID,
-  T4DComponentConfig,
-  T4DComponentDatasourceDeclaration,
-} from '@ws-ui/webform-editor';
+import { EComponentKind, T4DComponentConfig } from '@ws-ui/webform-editor';
 import { Settings } from '@ws-ui/webform-editor';
 import { MdCircle } from 'react-icons/md';
 
@@ -53,45 +48,16 @@ export default {
     ],
     datasources: {
       accept: ['entitysel'],
-      declarations: (props: ITagsProps) => {
-        const { attribut, currentElement = '', datasource = '' } = props;
-        const declarations: T4DComponentDatasourceDeclaration[] = [
-          { path: datasource, iterable: true },
-          { path: currentElement },
-        ];
-        if (attribut) {
-          const { id: ds, namespace } = splitDatasourceID(datasource?.trim()) || {};
-          // const { id: currentDs, namespace: currentDsNamespace } =
-          // splitDatasourceID(currentElement) || {};
-
-          if (!ds) {
-            return;
-          }
-          /*if (currentDs && currentDsNamespace === namespace) {
-            const colSrcID = `${currentDs}.${attribut}`;
-            declarations.push({
-              path: namespace ? `${namespace}:${colSrcID}` : colSrcID,
-            });
-          }*/
-
-          const fieldSrc = `${ds}.[].${attribut}`;
-          declarations.push({
-            path: namespace ? `${namespace}:${fieldSrc}` : fieldSrc,
-          });
-        }
-
-        return declarations;
-      },
+      declarations: [{ key: 'datasource', iterable: true }, { key: 'currentElement' }],
     },
   },
   defaultProps: {
     iterableChild: true,
-    attribut: '',
     enableAction: true,
     iconAction: 'fa-solid fa-xmark',
     iconLoader: 'fa-solid fa-spinner',
     style: {
-      display: 'inline-block',
+      display: 'inline-flex',
       backgroundColor: 'rgb(218, 216, 216)',
       color: 'rgb(48, 48, 48)',
       paddingBottom: '6px',
@@ -110,7 +76,6 @@ export default {
 
 export interface ITagsProps extends webforms.ComponentProps {
   enableAction?: boolean;
-  attribut?: string;
   iconAction?: string;
   iconLoader?: string;
   componentWidth?: any;

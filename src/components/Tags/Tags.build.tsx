@@ -1,8 +1,15 @@
-import { useEnhancedNode } from '@ws-ui/webform-editor';
+import {
+  IteratorProvider,
+  selectResolver,
+  useEnhancedEditor,
+  useEnhancedNode,
+} from '@ws-ui/webform-editor';
+import { Element } from '@ws-ui/craftjs-core';
 import cn from 'classnames';
 import { FC } from 'react';
 import { MdWarning } from 'react-icons/md';
 import { ITagsProps } from './Tags.config';
+import useDatasourceSub from '../Hook/use-datasources-subscription';
 
 const Tags: FC<ITagsProps> = ({
   enableAction = true,
@@ -18,19 +25,9 @@ const Tags: FC<ITagsProps> = ({
   const {
     connectors: { connect },
   } = useEnhancedNode();
+  const { resolver } = useEnhancedEditor(selectResolver);
 
-  const Tags = [
-    {
-      name: 'Tag1',
-    },
-    {
-      name: 'Tag2',
-    },
-    {
-      name: 'Tag3',
-    },
-  ];
-
+  useDatasourceSub();
   return (
     <div
       ref={connect}
@@ -39,12 +36,12 @@ const Tags: FC<ITagsProps> = ({
     >
       {datasource ? (
         <>
-          {Tags.map((tag, index) => (
-            <div className=" flex items-center space-x-2" style={style} key={index}>
-              <span>{tag.name}</span>
-              {enableAction && <div className={cn('action cursor-pointer fa', iconAction)} />}
-            </div>
-          ))}
+          <div className="items-center space-x-2" style={style}>
+            <IteratorProvider>
+              <Element is={resolver.Text} id="container" canvas />
+            </IteratorProvider>
+            {enableAction && <div className={cn('action cursor-pointer fa', iconAction)} />}
+          </div>
 
           <div
             style={{ ...style, width: '' }}

@@ -1,17 +1,25 @@
-import { DataLoader, updateEntity, useRenderer, useSources } from '@ws-ui/webform-editor';
+import {
+  DataLoader,
+  EntityProvider,
+  selectResolver,
+  updateEntity,
+  useEnhancedEditor,
+  useRenderer,
+  useSources,
+} from '@ws-ui/webform-editor';
 import cn from 'classnames';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-
+import { Element } from '@ws-ui/craftjs-core';
 import { ITagsProps } from './Tags.config';
 
 const Tags: FC<ITagsProps> = ({
   enableAction = true,
   iconLoader,
   iconAction,
-  attribut,
   style,
   componentWidth,
   componentHeight,
+  iterator,
   className,
   classNames = [],
 }) => {
@@ -24,14 +32,14 @@ const Tags: FC<ITagsProps> = ({
   const {
     sources: { datasource: ds, currentElement },
   } = useSources({ acceptIteratorSel: true });
-
+  const { resolver } = useEnhancedEditor(selectResolver);
   const loader = useMemo<DataLoader | null>(() => {
     if (!ds) {
       return null;
     }
 
-    return DataLoader.create(ds, [attribut as string]);
-  }, [attribut, ds]);
+    return DataLoader.create(ds, ds.dataclass.getKeys()); // TODO: ugly workaround
+  }, [ds]);
 
   const updateFromLoader = useCallback(() => {
     if (!loader) {
@@ -149,10 +157,6 @@ const Tags: FC<ITagsProps> = ({
     };
   }, [currentDsChangeHandler]);
 
-  // TODO: can we do it like a Matrix
-  // TODO: handle if attribute is not defined
-  // TODO: if the width is fix make sur that you display a part of text. (maybe a css example can do it)
-
   return (
     <div
       ref={connect}
@@ -161,14 +165,21 @@ const Tags: FC<ITagsProps> = ({
     >
       {loader ? (
         <>
-          {tags.map((tag, index) => (
+          {tags.map((_tag, index) => (
             <div
-              className={`flex items-center space-x-2 ${selected === index && 'selected'}`}
+              className={`items-center space-x-2 ${selected === index && 'selected'}`}
               style={style}
               key={index}
               onClick={() => handleClick(index)}
             >
-              <span>{tag[attribut as keyof typeof tag] as string}</span>
+              <EntityProvider index={index} selection={ds} current={ds?.id} iterator={iterator}>
+                <Element
+                  is={resolver.Text}
+                  id="container"
+                  className="fd-selectbox__container"
+                  canvas
+                />
+              </EntityProvider>
               {enableAction && (
                 <div
                   className={cn('action cursor-pointer fa', iconAction)}
