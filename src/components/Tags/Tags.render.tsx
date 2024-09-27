@@ -1,14 +1,17 @@
 import {
-  DataLoader,
   EntityProvider,
-  selectResolver,
-  updateEntity,
   useEnhancedEditor,
   useRenderer,
   useSources,
+  selectResolver,
+  useEnhancedNode,
+  useDataLoader,
+  useDsChangeHandler,
+  entitySubject,
+  EntityActions,
 } from '@ws-ui/webform-editor';
 import cn from 'classnames';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Element } from '@ws-ui/craftjs-core';
 import { ITagsProps } from './Tags.config';
 
@@ -16,154 +19,119 @@ const Tags: FC<ITagsProps> = ({
   enableAction = true,
   iconLoader,
   iconAction,
+  iterator,
   style,
   componentWidth,
   componentHeight,
-  iterator,
   className,
   classNames = [],
 }) => {
   const { connect, emit } = useRenderer({
     omittedEvents: ['onclick', 'onclickaction'],
+    autoBindEvents: false,
   });
-  const [tags, setTags] = useState<datasources.IEntity[]>(() => []);
-  const [fullLength, setFullLength] = useState<number>(0);
-  const [selected, setSelected] = useState<number>(-1);
-  const {
-    sources: { datasource: ds, currentElement },
-  } = useSources({ acceptIteratorSel: true });
+  const { id: nodeID } = useEnhancedNode();
+  const [selected, setSelected] = useState(-1);
+  const [_scrollIndex, setScrollIndex] = useState(0);
   const { resolver } = useEnhancedEditor(selectResolver);
-  const loader = useMemo<DataLoader | null>(() => {
-    if (!ds) {
-      return null;
-    }
+  const {
+    sources: { datasource: ds, currentElement: currentDs },
+  } = useSources({
+    acceptIteratorSel: true,
+  });
+  let step = { start: 0, end: 99 };
+  const [count, setCount] = useState(0);
+  const [tags, setTags] = useState<datasources.IEntity[]>(() => []);
 
-    return DataLoader.create(ds, ds.dataclass.getKeys()); // TODO: ugly workaround
-  }, [ds]);
+  const { page, entities, fetchIndex } = useDataLoader({
+    source: ds,
+    step,
+  });
 
-  const updateFromLoader = useCallback(() => {
-    if (!loader) {
-      return;
-    }
-    setTags((prev) => [...prev, ...loader.page]);
-    setFullLength(loader.length);
-  }, [loader]);
+  const { updateCurrentDsValue } = useDsChangeHandler({
+    source: ds,
+    currentDs,
+    selected,
+    setSelected,
+    setScrollIndex,
+    setCount,
+    fetchIndex,
+    onDsChange: (length, selected) => {
+      if (selected >= 0) {
+        updateCurrentDsValue({
+          index: selected < length ? selected : 0,
+          forceUpdate: true,
+        });
+      }
+    },
+    onCurrentDsChange: (selected) => {
+      entitySubject.next({
+        action: EntityActions.UPDATE,
+        payload: {
+          nodeID,
+          rowIndex: selected,
+        },
+      });
+    },
+  });
 
-  // need this to work in rederer
+  const loadMore = () => {fetchIndex(count);};
+
   useEffect(() => {
-    if (!loader || !ds) return;
-
-    loader.sourceHasChanged().then(updateFromLoader);
-  }, []);
-
-  useEffect(() => {
-    if (!loader || !ds) {
-      return;
+    if (!page.fetching) {
+      setTags(prev => [...prev, ...entities]);
     }
-
-    const dsListener = () => {
-      setTags([]);
-      loader.sourceHasChanged().then(updateFromLoader);
-    };
-    ds.addListener('changed', dsListener);
-    return () => {
-      ds.removeListener('changed', dsListener);
-    };
-  }, [ds, updateFromLoader]);
-
-  const updateCurrentDsValue = async ({
-    index,
-    forceUpdate = false,
-    fireEvent = true,
-  }: {
-    index: number;
-    forceUpdate?: boolean;
-    fireEvent?: boolean;
-  }) => {
-    if (!ds || !currentElement || !forceUpdate) {
-      return;
-    }
-    await updateEntity({ index, datasource: ds, currentElement, fireEvent });
-  };
-
-  const loadMore = () => {
-    if (loader && fullLength > tags.length) {
-      const newStart = loader.end;
-      loader?.fetchPage(newStart).then(updateFromLoader);
-    }
-  };
+  }, [page.fetching]);
 
   const handleAction = async (e: any, index: number) => {
-    await updateCurrentDsValue({ index, forceUpdate: true });
+    await updateCurrentDsValue({ index });
     e.stopPropagation();
     emit('onclickaction');
   };
 
   const handleClick = async (index: number) => {
-    await updateCurrentDsValue({ index, forceUpdate: true });
+    setSelected(index);
+    await updateCurrentDsValue({ index });
     emit('onclick');
   };
 
-  const getParentEntitySel = (
-    source: datasources.DataSource,
-    dataclassID: string,
-  ): datasources.DataSource | null => {
-    const parent = source.getParentSource();
-    if (!parent) {
-      return null;
-    } else if (parent.type === 'entitysel' && parent.dataclassID === dataclassID) {
-      return parent;
-    }
-
-    return getParentEntitySel(parent, dataclassID);
-  };
-  // handle selelctElement
-  const currentDsChangeHandler = useCallback(async () => {
-    if (!currentElement) {
-      return;
-    }
-
-    const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || ds;
-    const entity = (currentElement as any).getEntity();
-    if (entity) {
-      let currentIndex = entity.getPos();
-      if (currentIndex == null && parent) {
-        // used "==" to handle both null & undefined values
-        currentIndex = await parent.findElementPosition(currentElement);
-      }
-      if (typeof currentIndex === 'number') {
-        setSelected(currentIndex);
-      }
-    } else {
-      setSelected(-1);
-    }
-  }, [currentElement]);
-
   useEffect(() => {
-    if (!currentElement) {
-      return;
+    // select current element
+    if (currentDs && selected === -1) {
+      try {
+        let index = -1;
+        if (currentDs.type === 'entity') {
+          index = (currentDs as any).getEntity()?.getPos();
+        } else if (
+          currentDs.type === 'scalar' &&
+          currentDs.dataType === 'object' &&
+          currentDs.parentSource
+        ) {
+          index = (currentDs as any).getPos();
+        }
+        if (index >= 0) {
+          setSelected(index);
+          setScrollIndex(index);
+        }
+      } catch (e) {
+        // proceed
+      }
     }
-    // Get The selected element position
-    currentDsChangeHandler();
   }, []);
 
   useEffect(() => {
-    if (!currentElement) {
-      return;
-    }
-    currentElement.addListener('changed', currentDsChangeHandler);
-    return () => {
-      currentElement.removeListener('changed', currentDsChangeHandler);
-    };
-  }, [currentDsChangeHandler]);
+    fetchIndex(0);
+  }, []);
 
+  // TODO: loadMore ?? 
+  // TODO: Still having issue with PageSize
   return (
     <div
       ref={connect}
       className={cn(className, classNames)}
       style={{ width: componentWidth, height: componentHeight }}
     >
-      {loader ? (
+      {tags ? (
         <>
           {tags.map((_tag, index) => (
             <div
@@ -172,7 +140,12 @@ const Tags: FC<ITagsProps> = ({
               key={index}
               onClick={() => handleClick(index)}
             >
-              <EntityProvider index={index} selection={ds} current={ds?.id} iterator={iterator}>
+              <EntityProvider
+                index={index}
+                selection={ds}
+                current={currentDs?.id}
+                iterator={iterator}
+              >
                 <Element
                   is={resolver.Text}
                   id="container"
@@ -180,6 +153,7 @@ const Tags: FC<ITagsProps> = ({
                   canvas
                 />
               </EntityProvider>
+
               {enableAction && (
                 <div
                   className={cn('action cursor-pointer fa', iconAction)}
@@ -188,7 +162,7 @@ const Tags: FC<ITagsProps> = ({
               )}
             </div>
           ))}
-          {fullLength > tags.length && (
+          {count > entities.length && (
             <div
               style={{ ...style, width: '' }}
               className={cn('load-more cursor-pointer fa leading-normal', iconLoader)}
