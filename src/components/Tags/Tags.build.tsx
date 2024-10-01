@@ -3,13 +3,13 @@ import {
   selectResolver,
   useEnhancedEditor,
   useEnhancedNode,
+  useDatasourceSub,
 } from '@ws-ui/webform-editor';
 import { Element } from '@ws-ui/craftjs-core';
 import cn from 'classnames';
 import { FC } from 'react';
 import { MdWarning } from 'react-icons/md';
 import { ITagsProps } from './Tags.config';
-import useDatasourceSub from '../Hook/use-datasources-subscription';
 
 const Tags: FC<ITagsProps> = ({
   enableAction = true,
