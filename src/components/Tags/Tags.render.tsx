@@ -123,7 +123,7 @@ const Tags: FC<ITagsProps> = ({
   useEffect(() => {
     if (!ds) return;
     // workAround for PageSize
-    const pageSize = ds.getPageSize();
+    const pageSize = !iterator?.includes('$') ? ds.getPageSize() : 100;
     setPageSize(pageSize);
     setStep({
       start: 0,
