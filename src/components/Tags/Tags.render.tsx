@@ -123,12 +123,14 @@ const Tags: FC<ITagsProps> = ({
   useEffect(() => {
     if (!ds) return;
     // workAround for PageSize
-    const pageSize = !iterator?.includes('$') ? ds.getPageSize() : 100;
-    setPageSize(pageSize);
-    setStep({
-      start: 0,
-      end: pageSize,
-    });
+    if (!iterator?.includes('$') && !ds.parentSource) {
+      const pageSize = ds.getPageSize();
+      setPageSize(pageSize);
+      setStep({
+        start: 0,
+        end: pageSize,
+      });
+    }
 
     fetchIndex(0);
   }, []);
