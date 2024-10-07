@@ -33,6 +33,7 @@ const Tags: FC<ITagsProps> = ({
   const { id: nodeID } = useEnhancedNode();
   const [selected, setSelected] = useState(-1);
   const [_scrollIndex, setScrollIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(100);
   const { resolver } = useEnhancedEditor(selectResolver);
   const {
     sources: { datasource: ds, currentElement: currentDs },
@@ -41,9 +42,8 @@ const Tags: FC<ITagsProps> = ({
   });
   let step = { start: 0, end: 99 };
   const [count, setCount] = useState(0);
-  const [tags, setTags] = useState<datasources.IEntity[]>(() => []);
 
-  const { page, entities, fetchIndex } = useDataLoader({
+  const { setStep, page, entities, fetchIndex } = useDataLoader({
     source: ds,
     step,
   });
@@ -75,13 +75,14 @@ const Tags: FC<ITagsProps> = ({
     },
   });
 
-  const loadMore = () => {fetchIndex(count);};
+  const loadMore = () => {
+    setStep({
+      start: 0,
+      end: page.end + pageSize,
+    });
 
-  useEffect(() => {
-    if (!page.fetching) {
-      setTags(prev => [...prev, ...entities]);
-    }
-  }, [page.fetching]);
+    fetchIndex(0);
+  };
 
   const handleAction = async (e: any, index: number) => {
     await updateCurrentDsValue({ index });
@@ -120,20 +121,27 @@ const Tags: FC<ITagsProps> = ({
   }, []);
 
   useEffect(() => {
+    if (!ds) return;
+    // workAround for PageSize
+    const pageSize = ds.getPageSize();
+    setPageSize(pageSize);
+    setStep({
+      start: 0,
+      end: pageSize,
+    });
+
     fetchIndex(0);
   }, []);
 
-  // TODO: loadMore ?? 
-  // TODO: Still having issue with PageSize
   return (
     <div
       ref={connect}
       className={cn(className, classNames)}
       style={{ width: componentWidth, height: componentHeight }}
     >
-      {tags ? (
+      {entities ? (
         <>
-          {tags.map((_tag, index) => (
+          {entities.map((_tag, index) => (
             <div
               className={`items-center space-x-2 ${selected === index && 'selected'}`}
               style={style}
