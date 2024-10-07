@@ -76,7 +76,6 @@ const Tags: FC<ITagsProps> = ({
   });
 
   const loadMore = () => {
-    console.log({ page, entities, fetchIndex });
     setStep({
       start: 0,
       end: page.end + pageSize,
