@@ -2,7 +2,7 @@
   "app_id": "qodly_66c098bb4a695cf5df16",
   "name": "qodly_tags",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.1.0",
   "type": "module",
   "author": {
     "name": "Qodly Team",
@@ -22,7 +22,7 @@
     "react-dom": "^17.0.2"
   },
   "devDependencies": {
-    "@qodly/cli": "^0.2.8",
+    "@qodly/cli": "^0.2.15",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
