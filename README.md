@@ -12,11 +12,11 @@ Classified under iterative components, the Tags component is specialized for ren
 
 ## Properties
 
-| **Property Name**       | **Type**         | **Description**                                                                                                                              |
-| ----------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Qodly Source**        | Entity Selection | Specifies the entity selection used as the data source for the Tags component.                                                               |
-| **Selected Element**    | Entity Selection | Defines the entity that serves as the selected element or entity.                                                                            |
-| **Iterate with**        | Entity Selection | Determines the entity used for iteration within the tag component. The default is `$this`, allowing dynamic data display.                    |
-| **Load More Component** | Entity Selection | Indicates the component used to load additional data based on the Page Size. A "Load More" button may be necessary for displaying more tags. |
-| **Enable Action**       | Boolean          | Activates actions within the Tags component, such as deleting tags.                                                                          |
-| **Action Icon**         | Icon             | Sets the icon linked to the action, with the default being a cross icon for deletion.                                                        |
+| **Property Name**       | **Type**                  | **Description**                                                                                                                              |
+| ----------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Qodly Source**        | Entity Selection or Array | Specifies the entity selection used as the data source for the Tags component.                                                               |
+| **Selected Element**    | Entity or Object          | Defines the entity that serves as the selected element or entity.                                                                            |
+| **Iterate with**        |                           | Determines the entity used for iteration within the tag component. The default is `$this`, allowing dynamic data display.                    |
+| **Load More Component** | Icon                      | Indicates the component used to load additional data based on the Page Size. A "Load More" button may be necessary for displaying more tags. |
+| **Enable Action**       | Boolean                   | Activates actions within the Tags component, such as deleting tags.                                                                          |
+| **Action Icon**         | Icon                      | Sets the icon linked to the action, with the default being a cross icon for deletion.                                                        |
