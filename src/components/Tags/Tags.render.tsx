@@ -122,14 +122,15 @@ const Tags: FC<ITagsProps> = ({
 
   useEffect(() => {
     if (!ds) return;
-    // workAround for PageSize
-    if (!iterator?.includes('$') && !ds.parentSource) {
+
+    const isScalarArray = ds.type === 'scalar' && ds.dataType === 'array';
+    const isRootIterator = !iterator?.includes('$') && !ds.parentSource;
+
+    if (!isScalarArray && isRootIterator) {
+      // workAround for PageSize
       const pageSize = ds.getPageSize();
       setPageSize(pageSize);
-      setStep({
-        start: 0,
-        end: pageSize,
-      });
+      setStep({ start: 0, end: pageSize });
     }
 
     fetchIndex(0);
