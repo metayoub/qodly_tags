@@ -40,12 +40,10 @@ const Tags: FC<ITagsProps> = ({
   } = useSources({
     acceptIteratorSel: true,
   });
-  let step = { start: 0, end: 99 };
   const [count, setCount] = useState(0);
 
   const { setStep, page, entities, fetchIndex } = useDataLoader({
     source: ds,
-    step,
   });
 
   const { updateCurrentDsValue } = useDsChangeHandler({
@@ -74,6 +72,12 @@ const Tags: FC<ITagsProps> = ({
       });
     },
   });
+
+  useEffect(() => {
+    if (count !== entities.length) {
+      fetchIndex(0);
+    }
+  }, [count]);
 
   const loadMore = () => {
     setStep({
@@ -142,7 +146,7 @@ const Tags: FC<ITagsProps> = ({
       className={cn(className, classNames)}
       style={{ width: componentWidth, height: componentHeight }}
     >
-      {entities ? (
+      {!page.fetching ? (
         <>
           {entities.map((_tag, index) => (
             <div
