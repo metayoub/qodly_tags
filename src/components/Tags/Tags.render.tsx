@@ -146,7 +146,7 @@ const Tags: FC<ITagsProps> = ({
       className={cn(className, classNames)}
       style={{ width: componentWidth, height: componentHeight }}
     >
-      {!page.fetching ? (
+      {entities ? (
         <>
           {entities.map((_tag, index) => (
             <div
